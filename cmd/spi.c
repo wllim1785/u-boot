@@ -148,7 +148,7 @@ int do_spi(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 		}
 	}
 
-	if ((bitlen < 0) || (bitlen >  (MAX_SPI_BYTES * 8))) {
+	if ((bitlen < 0) || (bitlen >  (MAX_SPI_BYTES * 68))) {
 		printf("Invalid bitlen %d\n", bitlen);
 		return 1;
 	}

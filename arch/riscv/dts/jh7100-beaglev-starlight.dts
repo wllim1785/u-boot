@@ -17,6 +17,8 @@
 		mshc1 = &sdio1;
 		serial0 = &uart3;
 		serial1 = &uart0;
+		spi1 = &qspi;
+		spi0 = &spi2;
 	};
 
 	chosen {
@@ -696,8 +698,8 @@
 		spi-rx-bus-width = <1>;
 	};
 
-	nand_flash: nand-flash@1 {
-		compatible = "spi-flash-nand";
+/*	nand_flash: nand-flash@1 {
+		compatible = "spi-nand";
 		reg = <1>;
 		spi-max-frequency = <31250000>;
 		page-size = <2048>;
@@ -709,7 +711,7 @@
 		cdns,tslch-ns = <1>;
 		spi-tx-bus-width = <1>;
 		spi-rx-bus-width = <1>;
-	};
+	}; */
 };
 
 &sdio0 {
@@ -976,13 +978,16 @@
 &spi2 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&spi2_pins>;
+	num-cs = <4>;
 	status = "okay";
 
-	spi_dev0: spi@0 {
-		compatible = "rohm,dh2228fv";
-		spi-max-frequency = <10000000>;
+	/*spi_nand0: spi-nand@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "spi-nand";
+		spi-max-frequency = <50000>;
 		reg = <0>;
-	};
+	}; */
 };
 
 &uart0 {

@@ -967,13 +967,17 @@ static int spinand_detect(struct spinand_device *spinand)
 	struct nand_device *nand = spinand_to_nand(spinand);
 	int ret;
 
-	ret = spinand_reset_op(spinand);
-	if (ret)
+/*  	ret = spinand_reset_op(spinand);
+	if (ret) {
+		printf("spinand_detect error 1\n");
 		return ret;
+	} */
 
 	ret = spinand_read_id_op(spinand, spinand->id.data);
-	if (ret)
-		return ret;
+	if (ret) {
+		printf("spinand_detect error 2\n");
+		//return ret;
+	}
 
 	spinand->id.len = SPINAND_MAX_ID_LEN;
 
@@ -981,21 +985,20 @@ static int spinand_detect(struct spinand_device *spinand)
 	if (ret) {
 		dev_err(spinand->slave->dev, "unknown raw ID %*phN\n",
 			SPINAND_MAX_ID_LEN, spinand->id.data);
-		return ret;
+		//return ret;
 	}
 
-	if (nand->memorg.ntargets > 1 && !spinand->select_target) {
+/*  	if (nand->memorg.ntargets > 1 && !spinand->select_target) {
 		dev_err(spinand->slave->dev,
 			"SPI NANDs with more than one die must implement ->select_target()\n");
 		return -EINVAL;
-	}
+	} */
 
-	dev_info(spinand->slave->dev,
-		 "%s SPI NAND was found.\n", spinand->manufacturer->name);
-	dev_info(spinand->slave->dev,
-		 "%llu MiB, block size: %zu KiB, page size: %zu, OOB size: %u\n",
+ 	printf("%s SPI NAND was found.\n", spinand->manufacturer->name);
+	printf(	"%llu MiB, block size: %zu KiB, page size: %zu, OOB size: %u\n",
 		 nanddev_size(nand) >> 20, nanddev_eraseblock_size(nand) >> 10,
 		 nanddev_page_size(nand), nanddev_per_page_oobsize(nand));
+ 
 
 	return 0;
 }
@@ -1030,17 +1033,22 @@ static int spinand_init(struct spinand_device *spinand)
 	struct nand_device *nand = mtd_to_nanddev(mtd);
 	int ret, i;
 
+	printf("spinand_init... \n");
 	/*
 	 * We need a scratch buffer because the spi_mem interface requires that
 	 * buf passed in spi_mem_op->data.buf be DMA-able.
 	 */
 	spinand->scratchbuf = kzalloc(SPINAND_MAX_ID_LEN, GFP_KERNEL);
-	if (!spinand->scratchbuf)
+	if (!spinand->scratchbuf) {
+		printf("spinand_init error 1... \n");
 		return -ENOMEM;
+	}
 
 	ret = spinand_detect(spinand);
-	if (ret)
+	if (ret) {
+		printf("spinand_init error 2... \n");
 		goto err_free_bufs;
+	}
 
 	/*
 	 * Use kzalloc() instead of devm_kzalloc() here, because some drivers
@@ -1051,6 +1059,7 @@ static int spinand_init(struct spinand_device *spinand)
 			       nanddev_per_page_oobsize(nand),
 			       GFP_KERNEL);
 	if (!spinand->databuf) {
+		printf("spinand_init error 3... \n");
 		ret = -ENOMEM;
 		goto err_free_bufs;
 	}
@@ -1058,20 +1067,26 @@ static int spinand_init(struct spinand_device *spinand)
 	spinand->oobbuf = spinand->databuf + nanddev_page_size(nand);
 
 	ret = spinand_init_cfg_cache(spinand);
-	if (ret)
+	if (ret) {
+		printf("spinand_init error 4... \n");
 		goto err_free_bufs;
+	}
 
-	ret = spinand_init_quad_enable(spinand);
-	if (ret)
+/* 	ret = spinand_init_quad_enable(spinand);
+	if (ret) {
+		printf("spinand_init error 5... \n");
 		goto err_free_bufs;
+	}
 
 	ret = spinand_upd_cfg(spinand, CFG_OTP_ENABLE, 0);
-	if (ret)
+	if (ret) {
+		printf("spinand_init error 6... \n");
 		goto err_free_bufs;
+	} */
 
 	ret = spinand_manufacturer_init(spinand);
 	if (ret) {
-		dev_err(spinand->slave->dev,
+		printf(spinand->slave->dev,
 			"Failed to initialize the SPI NAND chip (err = %d)\n",
 			ret);
 		goto err_free_bufs;
@@ -1080,17 +1095,23 @@ static int spinand_init(struct spinand_device *spinand)
 	/* After power up, all blocks are locked, so unlock them here. */
 	for (i = 0; i < nand->memorg.ntargets; i++) {
 		ret = spinand_select_target(spinand, i);
-		if (ret)
+		if (ret) {
+			printf("spinand_init error 6... \n");
 			goto err_free_bufs;
+		}
 
 		ret = spinand_lock_block(spinand, BL_ALL_UNLOCKED);
-		if (ret)
+		if (ret) {
+			printf("spinand_init error 7... \n");
 			goto err_free_bufs;
+		}
 	}
 
 	ret = nanddev_init(nand, &spinand_ops, THIS_MODULE);
-	if (ret)
+	if (ret) {
+		printf("spinand_init error 8... \n");
 		goto err_manuf_cleanup;
+	}
 
 	/*
 	 * Right now, we don't support ECC, so let the whole oob
@@ -1146,6 +1167,8 @@ static int spinand_probe(struct udevice *dev)
 	struct nand_device *nand = spinand_to_nand(spinand);
 	int ret;
 
+	printf("SPI NAND probe... \n");
+
 #ifndef __UBOOT__
 	spinand = devm_kzalloc(&mem->spi->dev, sizeof(*spinand),
 			       GFP_KERNEL);
@@ -1171,13 +1194,17 @@ static int spinand_probe(struct udevice *dev)
 	spinand_set_ofnode(spinand, dev_ofnode(dev));
 #endif
 
+	printf("SPI NAND init... \n");
 	ret = spinand_init(spinand);
-	if (ret)
+	if (ret) {
+		printf("SPI NAND init error... \n");
 		return ret;
+	}
 
 #ifndef __UBOOT__
 	ret = mtd_device_register(mtd, NULL, 0);
 #else
+	printf("SPI NAND add_mtd_device... \n");
 	ret = add_mtd_device(mtd);
 #endif
 	if (ret)

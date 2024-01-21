@@ -251,6 +251,8 @@ int spi_mem_exec_op(struct spi_slave *slave, const struct spi_mem_op *op)
 	u32 flag;
 	int ret;
 	int i;
+	
+	printf("spi_mem_exec_op \n");
 
 	if (!spi_mem_supports_op(slave, op))
 		return -ENOTSUPP;
@@ -428,13 +430,13 @@ int spi_mem_exec_op(struct spi_slave *slave, const struct spi_mem_op *op)
 	spi_release_bus(slave);
 
 	for (i = 0; i < pos; i++)
-		debug("%02x ", op_buf[i]);
-	debug("| [%dB %s] ",
+		printf("%02x ", op_buf[i]);
+	printf("| [%dB %s] ",
 	      tx_buf || rx_buf ? op->data.nbytes : 0,
 	      tx_buf || rx_buf ? (tx_buf ? "out" : "in") : "-");
 	for (i = 0; i < op->data.nbytes; i++)
-		debug("%02x ", tx_buf ? tx_buf[i] : rx_buf[i]);
-	debug("[ret %d]\n", ret);
+		printf("%02x ", tx_buf ? tx_buf[i] : rx_buf[i]);
+	printf("[ret %d]\n", ret);
 
 	if (ret < 0)
 		return ret;

@@ -281,7 +281,7 @@ static void spi_hw_init(struct udevice *bus, struct dw_spi_priv *priv)
  */
 __weak int dw_spi_get_clk(struct udevice *bus, ulong *rate)
 {
-	struct dw_spi_priv *priv = dev_get_priv(bus);
+	/* struct dw_spi_priv *priv = dev_get_priv(bus);
 	int ret;
 
 	ret = clk_get_by_index(bus, 0, &priv->clk);
@@ -292,7 +292,11 @@ __weak int dw_spi_get_clk(struct udevice *bus, ulong *rate)
 	if (ret && ret != -ENOSYS && ret != -ENOTSUPP)
 		return ret;
 
-	*rate = clk_get_rate(&priv->clk);
+	*rate = clk_get_rate(&priv->clk); */
+	printf("Get fixed clock rate\n");
+	/* 50MHz clock */
+	*rate = 50000000;
+	printf("Fixed clock rate = %ld\n", *rate);
 	if (!*rate)
 		goto err_rate;
 
@@ -301,8 +305,8 @@ __weak int dw_spi_get_clk(struct udevice *bus, ulong *rate)
 	return 0;
 
 err_rate:
-	clk_disable(&priv->clk);
-	clk_free(&priv->clk);
+/* 	clk_disable(&priv->clk);
+	clk_free(&priv->clk); */
 
 	return -EINVAL;
 }
@@ -676,6 +680,8 @@ static int dw_spi_set_speed(struct udevice *bus, uint speed)
 	dw_write(priv, DW_SPI_SSIENR, 0);
 
 	/* clk_div doesn't support odd number */
+	//speed = 500000;
+	speed = 10000000;
 	clk_div = priv->bus_clk_rate / speed;
 	clk_div = (clk_div + 1) & 0xfffe;
 	dw_write(priv, DW_SPI_BAUDR, clk_div);
@@ -684,7 +690,7 @@ static int dw_spi_set_speed(struct udevice *bus, uint speed)
 	dw_write(priv, DW_SPI_SSIENR, 1);
 
 	priv->freq = speed;
-	dev_dbg(bus, "speed=%d clk_div=%d\n", priv->freq, clk_div);
+	printf("speed=%d clk_div=%d\n", priv->freq, clk_div);
 
 	return 0;
 }
@@ -698,8 +704,9 @@ static int dw_spi_set_mode(struct udevice *bus, uint mode)
 	 * rx & tx is requested. So we have to defer this to the
 	 * real transfer function.
 	 */
-	priv->mode = mode;
-	dev_dbg(bus, "mode=%d\n", priv->mode);
+	//priv->mode = mode;
+	priv->mode = 3;
+	printf("mode=%d\n", priv->mode);
 
 	return 0;
 }
