@@ -690,7 +690,7 @@ static int dw_spi_set_speed(struct udevice *bus, uint speed)
 	dw_write(priv, DW_SPI_SSIENR, 1);
 
 	priv->freq = speed;
-	printf("speed=%d clk_div=%d\n", priv->freq, clk_div);
+	//printf("speed=%d clk_div=%d\n", priv->freq, clk_div);
 
 	return 0;
 }
@@ -706,7 +706,7 @@ static int dw_spi_set_mode(struct udevice *bus, uint mode)
 	 */
 	//priv->mode = mode;
 	priv->mode = 3;
-	printf("mode=%d\n", priv->mode);
+	//printf("mode=%d\n", priv->mode);
 
 	return 0;
 }

@@ -32,6 +32,7 @@ static unsigned int	freq;
 static int		bitlen;
 static uchar		dout[MAX_SPI_BYTES];
 static uchar		din[MAX_SPI_BYTES];
+static int printing;
 
 static int do_spi_xfer(int bus, int cs)
 {
@@ -71,11 +72,13 @@ static int do_spi_xfer(int bus, int cs)
 	if (ret) {
 		printf("Error %d during SPI transaction\n", ret);
 	} else {
-		int j;
+		int j;   
 
-		for (j = 0; j < ((bitlen + 7) / 8); j++)
-			printf("%02X", din[j]);
-		printf("\n");
+    if (printing) {
+		  for (j = 0; j < ((bitlen + 7) / 8); j++)
+			  printf("%02X", din[j]);
+		  printf("\n");
+    }
 	}
 done:
 	spi_release_bus(slave);
@@ -102,6 +105,12 @@ int do_spi(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 	char  *cp = 0;
 	uchar tmp;
 	int   j;
+ 
+	printing = 0;
+	
+	printf("argc = %d\n", argc);
+	if (argc == 7)		
+		printing = 1;
 
 	/*
 	 * We use the last specified parameters, unless new ones are
@@ -162,7 +171,7 @@ int do_spi(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 /***************************************************/
 
 U_BOOT_CMD(
-	sspi,	5,	1,	do_spi,
+	sspi,	8,	1,	do_spi,
 	"SPI utility command",
 	"[<bus>:]<cs>[.<mode>][@<freq>] <bit_len> <dout> - Send and receive bits\n"
 	"<bus>     - Identifies the SPI bus\n"

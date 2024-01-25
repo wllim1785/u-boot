@@ -97,6 +97,20 @@
 			"fi; " \
 		"fi\0" \
 	"fdtfile=" CONFIG_DEFAULT_FDT_FILE "\0" \
+  "nand_initialize=sspi 0:0.3 8 ff; sspi 0:0.3 24 1fa000; sspi 0:0.3 24 1fb000; sspi 0:0.3 24 1fc000\0" \
+  "nand_init=for c in 1 2; do run nand_initialize; done\0" \
+  "nand_status=sspi 0:0.3 24 0fa0; sspi 0:0.3 24 0fb0; sspi 0:0.3 24 0fc0\0" \
+  "nand_erase=sspi 0:0.3 8 06; sspi 0:0.3 32 D8000000\0" \
+  "nand_pp=sspi 0:0.3 8 06; sspi 0:0.3 2176 84000000000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff00000000ffffffff; sspi 0:0.3 32 10000000\0" \
+  "nand_read=sspi 0:0.3 32 13000000; sspi 0:0.3 2176 03000000 1 1 1\0" \
+  "nand_read_cycle=for c in 1 2 3 4 5 6 7 8 9 10; do run nand_read; done\0" \
+  "nand_read_stress=for c in 1 2 3 4; do run nand_read_cycle; done\0" \
+  "nand_pp_cycle=for c in 1 2 3 4 5 6 7 8 9 10; do run nand_pp; done\0" \
+  "nand_pp_hundreds=for c in 1 2 3 4 5 6 7 8 9 10; do run nand_pp_cycle; done\0" \
+  "nand_pp_thousands=for c in 1 2 3 4 5 6 7 8 9 10; do run nand_pp_hundreds; done\0" \
+  "nand_pp_stress_8k=for c in 1 2 3 4 5 6 7 8; do run nand_pp_thousands; done\0" \
+  "nand_pp_stress_5k=for c in 1 2 3 4 5; do run nand_pp_thousands; done\0" \
+  "nand_pp_stress_2k=for c in 1 2; do run nand_pp_thousands; done\0" \
 	BOOTENV \
 	BOOTENV_SF
 
